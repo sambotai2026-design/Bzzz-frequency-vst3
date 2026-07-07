@@ -1,0 +1,46 @@
+name: Build VST3
+
+on: [push, workflow_dispatch]
+
+jobs:
+  macos:
+    name: macOS (universel Intel + Apple Silicon)
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Récupérer JUCE 8.0.4
+        run: git clone --depth 1 --branch 8.0.4 https://github.com/juce-framework/JUCE.git
+
+      - name: Configurer
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Release -DJUCE_DIR="$PWD/JUCE" -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64"
+
+      - name: Compiler
+        run: cmake --build build --config Release
+
+      - name: Publier le VST3 macOS
+        uses: actions/upload-artifact@v4
+        with:
+          name: BZzz-Frequency-VST3-macOS
+          path: "build/BzzzFrequency_artefacts/Release/VST3/BZzz Frequency.vst3"
+
+  windows:
+    name: Windows
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Récupérer JUCE 8.0.4
+        run: git clone --depth 1 --branch 8.0.4 https://github.com/juce-framework/JUCE.git
+
+      - name: Configurer
+        run: cmake -B build -DJUCE_DIR="${{ github.workspace }}/JUCE"
+
+      - name: Compiler
+        run: cmake --build build --config Release
+
+      - name: Publier le VST3 Windows
+        uses: actions/upload-artifact@v4
+        with:
+          name: BZzz-Frequency-VST3-Windows
+          path: "build/BzzzFrequency_artefacts/Release/VST3/BZzz Frequency.vst3"
